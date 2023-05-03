@@ -1,46 +1,42 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import Collapsible from 'react-native-collapsible';
 
-const Statement = props => {
+const smallStatement = props => {
+    var dateTime = <View style={{display: 'none'}}><Text></Text></View>
     if (props.oldTxnDate != props.transactionDate){
-        return (
-            <View key={index} style={{alignItems: 'flex-start'}}> 
+        dateTime = (
+            <View style={{alignItems: 'flex-start'}}> 
                 <Text style={{color:'orange'}}>
-                {item.transactionDate.slice(0,10)}
+                    {props.transactionDate}
                 </Text>
             </View>
         )
     }
-    return(
+
+    return (
         <View style={{flexDirection: 'column'}}>
+            <View>
+                {dateTime}
+            </View>
             <View style={{flexDirection: 'row', borderWidth: 1, borderColor: 'white'}}>
-                <View style={{flex: 2}}>
+                <View style={{flex: 1.5}}>
                     <Text style={style.textField}>
                         {props.txnTime}
                     </Text>
                 </View>
-                <View style={style.rowField}>
-                    <Text style={style.textField}>
-                        {props.beginBalance}
-                    </Text>
-                </View>
-                <View style={{flex: 6, borderWidth: 1, borderColor: 'white'}}>
-                    <Text style={style.textField}>
+                <View style={{flex: 6, borderWidth: 1, borderColor: 'white',flexWrap: 'nowrap'}}>
+                    <Text style={[style.textField,{fontSize: 11}]}>
                         {props.remark}
                     </Text>
-                </View>
-                <View style={style.rowField}>
-                    <Text style={style.textField}>
-                        {props.endbalance}
-                    </Text>
-                </View>
+                </View>                
                 <View style={style.rowField}>
                     <Text style={style.textField}>
                         {props.accountId}
                     </Text>
                 </View>
                 <View style={style.rowField}>
-                    <Text style={style.textField}>
+                    <Text style={[style.textField,{color: props.amountColor}]}>
                         {props.amount}
                     </Text>
                 </View>
@@ -60,4 +56,4 @@ const style = StyleSheet.create({
     }
 })
 
-export default Statement;
+export default smallStatement;
