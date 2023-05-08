@@ -11,38 +11,15 @@ import {
 } from "react-native";
 import Header from "./../component/header";
 import Account from "../component/account";
+import { CommaFormatted, ProcessResponse } from "./../src/globalFunction"
 import global from "./../src/global"
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation, route }) => {
   let [isLoading, setIsLoading] = useState(true);
   let [error, setError] = useState();
   let [accessToken, setAccessToken] = useState();
   let [accounts, setAccounts] = useState();
   let [isAccountSuccess, setAccountSuccess] = useState(false);
-
-  function CommaFormatted(amount) {
-    var delimiter = ","; // replace comma if desired
-    var a = amount.split('.',2)
-    var d = a[1];
-    var i = parseInt(a[0]);
-    if(isNaN(i)) { return ''; }
-    var minus = '';
-    if(i < 0) { minus = '-'; }
-    i = Math.abs(i);
-    var n = new String(i);
-    var a = [];
-    while(n.length > 3) {
-      var nn = n.substr(n.length-3);
-      a.unshift(nn);
-      n = n.substr(0,n.length-3);
-    }
-    if(n.length > 0) { a.unshift(n); }
-    n = a.join(delimiter);
-    if(d.length < 1) { amount = n; }
-    else { amount = n + '.' + d; }
-    amount = minus + amount;
-    return amount;
-  }
 
   useEffect(() => {
     fetch(
@@ -57,41 +34,45 @@ const Home = ({ navigation }) => {
           "Content-Type": "application/x-www-form-urlencoded",
           "Device-Id": "0C49AB76-F86E-4955-92D4-1DE7D4881A3F",
         },
-        body: '{\r\n    "grant_type": "password",\r\n    "username": "dashka376",\r\n    "password": "cXdlcnF3ZXI0JA==",\r\n    "channelId": "I",\r\n    "languageId": "003"\r\n}',
+        body: '{\r\n    "grant_type": "password",\r\n    "username": "' + route.params.username + '",\r\n    "password": "cXdlcnF3ZXI0JA==",\r\n    "channelId": "I",\r\n    "languageId": "003"\r\n}',
       }
     )
-      .then((response) => response.json())
+      .then(ProcessResponse)
       .then(
         async (res) => {
+          const { statusCode, data} = res
+          console.log("statusCode: " + statusCode)
+          console.log("response: " + data)
           setIsLoading(false);
-          console.log("worked here login: " + res.access_token);
-          // const account = getAllAccounts(res.access_token).then(res => console.log(res))
-          setAccessToken(res.access_token)
-          global.access_token = res.access_token
-          global.refresh_token = res.refresh_token
-          fetch("https://api.khanbank.com:9003/v1/omni/accounts/", {
-            method: "GET",
-            headers: {
-              "App-Version": "1.3.29-rc.480",
-              "Accept-Language": "mn-MN",
-              "Authorization": "Bearer " + res.access_token,
-              "Content-Type": "application/x-www-form-urlencoded",
-              "Device-Id": "0C49AB76-F86E-4955-92D4-1DE7D4881A3F",
-            },
-          })
-            .then((response) => response.json())
-            .then(
-              (res) => {
-                // console.log(res);
-                setAccounts(res.allAccounts)
-                setAccountSuccess(true)
+          if (statusCode == 200){
+            console.log("worked here login: " + data.access_token);
+            // const account = getAllAccounts(res.access_token).then(res => console.log(res))
+            setAccessToken(data.access_token)
+            global.access_token = data.access_token
+            global.refresh_token = data.refresh_token
+            await fetch("https://api.khanbank.com:9003/v1/omni/accounts/", {
+              method: "GET",
+              headers: {
+                "App-Version": "1.3.29-rc.480",
+                "Accept-Language": "mn-MN",
+                "Authorization": "Bearer " + data.access_token,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Device-Id": "0C49AB76-F86E-4955-92D4-1DE7D4881A3F",
               },
-              (error) => {
-                setError(error);
-              }
-            )
-            .catch((error) => console.log("error", error)
+            }).then((response) => response.json())
+              .then(
+                (res) => {
+                  // console.log(res);
+                  setAccounts(res.allAccounts)
+                  setAccountSuccess(true)
+                },
+                (error) => {
+                  setError(error);
+                }
+              )
+              .catch((error) => console.log("error", error)
           )
+        }
         },
         (error) => {
           setIsLoading(false);
@@ -106,7 +87,8 @@ const Home = ({ navigation }) => {
       return <ActivityIndicator size="large" />;
     }
     if (error) {
-      return <Text> {error} </Text>;
+      console.log('error' + error)
+      return <Text> aldaa </Text>;
     }
     
     if (isAccountSuccess){

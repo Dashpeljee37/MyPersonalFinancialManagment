@@ -12,12 +12,13 @@ import AccountInfo from "../component/accountInfo"
 import Statement from "../component/statement";
 import SmallStatement from "../component/smallStatement";
 import { Dimensions } from "react-native";
+import { CommaFormatted, ProcessResponse } from "../src/globalFunction";
 
 const Accounts = ({ navigation, route }) => {
 
     let [isLoading, setIsLoading] = useState(true);
     let [isStatementLoading, setIsStatementLoading] = useState(true);
-    let [accountDetails, setAccountDetails] = useState();
+    let [accountDetails, setAccountDetails] = useState(null);
     let [accountStatement, setAccountStatement] = useState();
     let [error, setError] = useState();
     let [accountStatementFetched, setAccountStatementFetched] = useState(true);
@@ -37,9 +38,12 @@ const Accounts = ({ navigation, route }) => {
             }
           }
         )
-          .then((response) => response.json())
+          .then(ProcessResponse)
           .then((res) => {
-                setAccountDetails(JSON.stringify(res))
+                const { statusCode, data } = res
+                if (statusCode == 200){
+                  setAccountDetails(JSON.stringify(data))
+                }
           })
           .then((res) => {
             setIsLoading(false);
@@ -63,9 +67,10 @@ const Accounts = ({ navigation, route }) => {
               }
             }
           )
-            .then((response) => response.json())
+            .then(ProcessResponse)
             .then((res) => {
-                  setAccountStatement(res)
+              const { statusCode, data } = res
+              if (statusCode==200) setAccountStatement(data)
             })
             .then((res) => {
               setIsStatementLoading(false);
@@ -80,6 +85,10 @@ const Accounts = ({ navigation, route }) => {
         if (error) {
           return <Text> {error} </Text>;
         }
+        if (accountDetails==null){
+          return(<Text>Дансны мэдэлэл олдоогүй байна.</Text>)
+        }
+
         var parsed_res = JSON.parse(accountDetails)
         var isPrimaryAccount = 'Үгүй'
         if (parsed_res.isPrimaryAccount == 'Y'){
